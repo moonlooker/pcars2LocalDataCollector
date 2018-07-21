@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
+import java.util.concurrent.locks.ReentrantLock;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -19,6 +20,12 @@ import org.slf4j.LoggerFactory;
 public class MyCache {
 
     private static Logger log = LoggerFactory.getLogger(MyCache.class);
+
+    private static ReentrantLock lockname = new ReentrantLock();
+    private static ReentrantLock lockplayers = new ReentrantLock();
+    private static ReentrantLock lockResult = new ReentrantLock();
+
+    private static volatile boolean isClean = false;
 
     /**
      * 比赛结果数据缓存
@@ -41,17 +48,27 @@ public class MyCache {
 
     public static void addRaceList(Part part) {
 
+        lockResult.lock();
         raceResultList.add(part);
+        lockResult.unlock();
     }
 
     public static void clearRaceList() {
 
+        lockResult.lock();
+        log.info("clean race List data xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx");
         raceResultList.clear();
+        lockResult.unlock();
     }
 
     public static List<Part> getRaceList() {
 
-        return raceResultList;
+        lockResult.lock();
+        try {
+            return raceResultList;
+        } finally {
+            lockResult.unlock();
+        }
     }
 
     /**
@@ -87,7 +104,9 @@ public class MyCache {
      */
     public static void updatePlayer(String player, Part time) {
 
+        lockplayers.lock();
         players.put(player, time);
+        lockplayers.unlock();
     }
 
     /**
@@ -97,7 +116,12 @@ public class MyCache {
      */
     public static Part getPlayerTime(String player) {
 
-        return players.get(player);
+        lockplayers.lock();
+        try {
+            return players.get(player);
+        } finally {
+            lockplayers.unlock();
+        }
     }
 
     /**
@@ -105,8 +129,10 @@ public class MyCache {
      */
     public static void clearPlayers() {
 
+        lockplayers.lock();
         log.info("clean player count data xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx");
         players.clear();
+        lockplayers.unlock();
     }
 
     /**
@@ -115,7 +141,12 @@ public class MyCache {
      */
     public static void addNameCache(String name) {
 
-        nameCache.add(name);
+        lockname.lock();
+        try {
+            nameCache.add(name);
+        } finally {
+            lockname.unlock();
+        }
     }
 
     /**
@@ -125,7 +156,12 @@ public class MyCache {
      */
     public static boolean isExistName(String name) {
 
-        return nameCache.contains(name);
+        lockname.lock();
+        try {
+            return nameCache.contains(name);
+        } finally {
+            lockname.unlock();
+        }
     }
 
     /**
@@ -133,8 +169,13 @@ public class MyCache {
      */
     public static void clearNameCache() {
 
-        log.info("clean playerName Cache xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx");
-        nameCache.clear();
+        lockname.lock();
+        try {
+            log.info("clean playerName Cache xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx");
+            nameCache.clear();
+        } finally {
+            lockname.unlock();
+        }
     }
 
 }

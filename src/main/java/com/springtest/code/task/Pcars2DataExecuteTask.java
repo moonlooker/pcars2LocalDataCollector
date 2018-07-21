@@ -69,7 +69,13 @@ public class Pcars2DataExecuteTask {
             && SessionStates.SESSION_RACE.ordinal() == Integer
                 .valueOf(String.valueOf(raceStatus.get("mSessionState")))) {
             /*判断当前session状态,只有比赛阶段才处理数据,并且采集状态打开*/
-            isRecord = true;
+            if (!isRecord) {
+                isRecord = true;
+                /*清理名字缓存*/
+                MyCache.clearRaceList();
+                MyCache.clearNameCache();
+                MyCache.clearPlayers();
+            }
             return;
         }
 
@@ -157,18 +163,12 @@ public class Pcars2DataExecuteTask {
             tempMap.add(tl.getmName());
         }
 
-        /*按照名次排序*/
-        result.sort((Part p1, Part p2) -> p1.getmRacePosition().compareTo(p2.getmRacePosition()));
         /*加入到缓存*/
         MyCache.addResult(result);
 
         log.info("比赛结果为：{}", JSON.toJSONString(result));
         /*停止统计数据*/
         isRecord = false;
-        /*清理名字缓存*/
-        MyCache.clearRaceList();
-        MyCache.clearNameCache();
-        MyCache.clearPlayers();
 
     }
 
@@ -176,7 +176,7 @@ public class Pcars2DataExecuteTask {
      * 玩家比赛总时间统计
      * @throws Exception
      */
-    @Scheduled(fixedDelay = 5000)
+    @Scheduled(fixedDelay = 2000)
     public void executeImm() throws Exception {
 
         String race1 = MyHttpClientUtils.doGet("http://127.0.0.1:8180/crest2/v1/api");
@@ -191,8 +191,9 @@ public class Pcars2DataExecuteTask {
         }
 
         /*如果是非比赛中则不统计*/
-        if (2 > Integer.valueOf(String.valueOf(raceStatus.get("mRaceState"))) && SessionStates.SESSION_RACE
-            .ordinal() == Integer.valueOf(String.valueOf(raceStatus.get("mSessionState")))) {
+        if (RaceStates.RACESTATE_RACING.ordinal() > Integer.valueOf(String.valueOf(raceStatus.get("mRaceState")))
+            && SessionStates.SESSION_RACE.ordinal() == Integer
+                .valueOf(String.valueOf(raceStatus.get("mSessionState")))) {
             return;
         } else if (SessionStates.SESSION_RACE.ordinal() != Integer
             .valueOf(String.valueOf(raceStatus.get("mSessionState")))) {
@@ -218,12 +219,22 @@ public class Pcars2DataExecuteTask {
             if (pre == null) {
                 /*如果没有缓存就创建一个新的*/
                 tPart.setmTotaleTime("0");
+                tPart.setmLapsCompleted("0");
                 MyCache.updatePlayer(tPart.getmName(), tPart);
+                log.info("create player [{}] TotaleTime data +++++++++++", tPart.getmName());
             } else {
-                if (2 < Integer.valueOf(pre.getmRaceStates())) {
+
+                if (RaceStates.RACESTATE_RACING.ordinal() == Integer.valueOf(pre.getmRaceStates())
+                    && RaceStates.RACESTATE_FINISHED.ordinal() <= Integer.valueOf(tPart.getmRaceStates())) {
+                    /*如果前一个记录是比赛中,当前记录是比赛结束后,则为最终结果*/
+                    tPart.setRecordComplete(true);
+                }
+                if (pre.isRecordComplete()) {
                     /*如果缓存数据已经是完成比赛就不再计算*/
+                    log.debug("已经是完成 player [{}] 不记录", tPart.getmName());
                     continue;
                 }
+
                 BigDecimal prelap = new BigDecimal(pre.getmLapsCompleted());
                 BigDecimal nowlap = new BigDecimal(tPart.getmLapsCompleted());
 
@@ -231,6 +242,8 @@ public class Pcars2DataExecuteTask {
                     /*如果缓存比赛时间数据小于当前比赛时间数据就累加统计*/
                     tPart.setmTotaleTime(addDecimal(pre.getmTotaleTime(), tPart.getmLastLapTimes()));
                     MyCache.updatePlayer(tPart.getmName(), tPart);
+                    log.debug("player [{}] TotaleTime data is [{}] +++++++++++", tPart.getmName(),
+                        tPart.getmTotaleTime());
                 }
             }
 

@@ -28,6 +28,8 @@ public class Part {
     private String mTotaleTime;
     //状态  see RaceStates
     private String mRaceStates;
+    //是否已经记录完毕
+    private boolean recordComplete = false;
 
     /**
      * 赛道信息
@@ -184,6 +186,16 @@ public class Part {
     public void setmRaceStates(String mRaceStates) {
 
         this.mRaceStates = mRaceStates;
+    }
+
+    public boolean isRecordComplete() {
+
+        return recordComplete;
+    }
+
+    public void setRecordComplete(boolean recordComplete) {
+
+        this.recordComplete = recordComplete;
     }
 
     public String formatTime(String time) {

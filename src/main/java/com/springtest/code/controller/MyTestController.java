@@ -52,7 +52,13 @@ public class MyTestController {
             sb.append("<th>最快圈速</th>");
 
             sb.append("</tr>");
-            for (Part t : e.getValue()) {
+
+            List<Part> result = e.getValue();
+
+            /*按照名次排序*/
+            result.sort((Part p1, Part p2) -> p1.getmRacePosition().compareTo(p2.getmRacePosition()));
+
+            for (Part t : result) {
                 sb.append("<tr>");
                 sb.append("<td>").append(t.getmRacePosition()).append("</td>");
                 sb.append("<td>").append(RaceStates.getDesc(t.getmRaceStates())).append("</td>");
