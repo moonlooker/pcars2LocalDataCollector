@@ -2,6 +2,10 @@
 
 赛车计划2本地比赛数据搜集
 
+只是搜集本地游戏,比赛结果数据.
+
+使用
+
 1.首先要安装jdk：https://pan.baidu.com/s/14MkKvQxoYBFXwBWF-IsTCw
 
 2.启动游戏后，运行startup.bat
