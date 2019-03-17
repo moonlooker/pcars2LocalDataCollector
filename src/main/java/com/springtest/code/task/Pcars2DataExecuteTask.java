@@ -41,6 +41,13 @@ public class Pcars2DataExecuteTask {
     @Resource
     private RunTimeExeService runTimeExeService;
 
+    private long sessionEndBegin = 0L;
+
+    /**
+     * 单位秒
+     */
+    private int finishWaitTime = 90;
+
     /**
      * 比赛结果统计
      * @throws Exception
@@ -112,6 +119,11 @@ public class Pcars2DataExecuteTask {
                 raceState = pTime.getmRaceStates();
             }
 
+            if (Integer.valueOf(raceState) == 3 && sessionEndBegin == 0) {
+                /*只要有人完赛就设置一个下完赛时间,用来判断统计完全终止时间*/
+                sessionEndBegin = System.currentTimeMillis();
+            }
+
             if (Integer.valueOf(raceState) < 3) {
                 /*只有完成比赛的玩家数据才被统计,每次获取的都是服务器实时列表,存在于当前session的玩家才能被统计*/
                 continueSwitch = true;
@@ -137,7 +149,8 @@ public class Pcars2DataExecuteTask {
             tPart.setmRaceStates(raceState);
             /*获取玩家完成比赛后的总时间*/
             tPart.setmTotaleTime(MyCache.getPlayerTime(tPart.getmName()) != null
-                ? MyCache.getPlayerTime(tPart.getmName()).getmTotaleTime() : "");
+                ? MyCache.getPlayerTime(tPart.getmName()).getmTotaleTime()
+                : "");
             tPart.setmTrackLocation(mTrackLocation);
             tPart.setmTrackVariation(mTrackVariation);
             tPart.setmTrackLength(mTrackLength);
@@ -148,6 +161,11 @@ public class Pcars2DataExecuteTask {
             MyCache.addNameCache(mName);
         }
 
+        if (System.currentTimeMillis() - sessionEndBegin <= finishWaitTime * 1000) {
+            /*从第一个完成比赛的玩家开始计算,如果已经超过预设时间则强行终止程序,
+             * 因为一些掉线或者其他原因的玩家会影响统计结束*/
+            continueSwitch = false;
+        }
         if (continueSwitch) {
             /*如果没有统计完成不进行结果统计,直到全部完成*/
             continueSwitch = false;
