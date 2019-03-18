@@ -183,7 +183,7 @@ public class Pcars2DataExecuteTask {
 
         /*加入到缓存*/
         MyCache.addResult(result);
-
+        sessionEndBegin = 0;
         log.info("比赛结果为：{}", JSON.toJSONString(result));
         /*停止统计数据*/
         isRecord = false;
