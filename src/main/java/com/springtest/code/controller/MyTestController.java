@@ -38,18 +38,18 @@ public class MyTestController {
 
         for (Entry<Long, List<Part>> e : MyCache.getCache().entrySet()) {
             Date raceTime = new Date(Long.valueOf(e.getKey()));
-            sb.append("<h4>").append(new SimpleDateFormat("yyyyMMdd HH:mm:ss").format(raceTime)).append("比赛")
-                .append(++i).append("结果</h4>");
+            sb.append("<h4>").append(new SimpleDateFormat("yyyyMMdd HH:mm:ss").format(raceTime)).append("race")
+                .append(++i).append("result</h4>");
             sb.append("<table border=\"1\">");
             sb.append("<tr>");
-            sb.append("<th>名次</th>");
-            sb.append("<th>比赛状态</th>");
-            sb.append("<th>级别</th>");
-            sb.append("<th>玩家</th>");
-            sb.append("<th>车型</th>");
-            sb.append("<th>完成圈数</th>");
-            sb.append("<th>总时间</th>");
-            sb.append("<th>最快圈速</th>");
+            sb.append("<th>ranking</th>");
+            sb.append("<th>race status</th>");
+            sb.append("<th>car class</th>");
+            sb.append("<th>player</th>");
+            sb.append("<th>car name</th>");
+            sb.append("<th>laps</th>");
+            sb.append("<th>total time</th>");
+            sb.append("<th>fast lap</th>");
 
             sb.append("</tr>");
 
@@ -94,17 +94,17 @@ public class MyTestController {
 
         for (Entry<Long, List<Part>> e : MyCache.getCache().entrySet()) {
             Date raceTime = new Date(Long.valueOf(e.getKey()));
-            sb.append("<h4>").append(new SimpleDateFormat("yyyyMMdd HH:mm:ss").format(raceTime)).append("比赛")
-                .append(++i).append("最快圈速排行</h4>");
+            sb.append("<h4>").append(new SimpleDateFormat("yyyyMMdd HH:mm:ss").format(raceTime)).append("race")
+                .append(++i).append("fast lap ranking</h4>");
             sb.append("<table border=\"1\">");
             sb.append("<tr>");
-            sb.append("<th>名次</th>");
-            sb.append("<th>玩家</th>");
-            sb.append("<th>车型</th>");
+            sb.append("<th>rank</th>");
+            sb.append("<th>player</th>");
+            sb.append("<th>Class</th>");
             sb.append("<th>Sector1</th>");
             sb.append("<th>Sector2</th>");
             sb.append("<th>Sector3</th>");
-            sb.append("<th>最快圈速</th>");
+            sb.append("<th>fast lap</th>");
             sb.append("</tr>");
 
             List<Part> temp = e.getValue();
